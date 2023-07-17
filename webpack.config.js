@@ -1,12 +1,28 @@
 const path = require("path");
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const webpackMode = process.env.NODE_ENV || "development";
 
 module.exports = {
   entry: path.join(__dirname, "src", "index.js"),
-  mode: "development",
+  mode: webpackMode,
   output: {
     path: path.resolve(__dirname, "dist"),
+    filename: '[name].min.js'
+  },
+  optimization: {
+		minimizer: webpackMode === 'production' ? [
+			new TerserPlugin({
+				terserOptions: {
+					compress: {
+						drop_console: true
+					}
+				}
+			})
+		] : [],
+		splitChunks: {
+			chunks: 'all'
+		}
   },
   module: {
     rules: [
@@ -47,7 +63,6 @@ module.exports = {
     new webpack.HotModuleReplacementPlugin(),
   ],
   devServer: {
-    hot: true,
     host: "localhost",
     port: 3000,
     historyApiFallback: true,
