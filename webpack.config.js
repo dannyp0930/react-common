@@ -1,8 +1,11 @@
 const path = require("path");
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
+
 const webpackMode = process.env.NODE_ENV;
 
 module.exports = {
@@ -10,21 +13,25 @@ module.exports = {
   mode: webpackMode,
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: '[name].min.js'
+    filename: "[name].min.js",
   },
   optimization: {
-		minimizer: webpackMode === 'production' ? [
-			new TerserPlugin({
-				terserOptions: {
-					compress: {
-						drop_console: true
-					}
-				}
-			})
-		] : [],
-		splitChunks: {
-			chunks: 'all'
-		}
+    minimizer:
+      webpackMode === "production"
+        ? [
+            new TerserPlugin({
+              terserOptions: {
+                compress: {
+                  drop_console: true,
+                },
+              },
+            }),
+            new CssMinimizerPlugin(),
+          ]
+        : [],
+    splitChunks: {
+      chunks: "all",
+    },
   },
   module: {
     rules: [
@@ -42,13 +49,17 @@ module.exports = {
         },
       },
       {
-				test: /\.?(js|jsx)$/,
-				enforce: 'pre',
-				use: ['source-map-loader'],
-			},
+        test: /\.?(js|jsx)$/,
+        enforce: "pre",
+        use: ["source-map-loader"],
+      },
       {
         test: /\.s[ac]ss$/i,
-        use: ["style-loader", "css-loader", "sass-loader"],
+        use: [
+          webpackMode === "production" ? MiniCssExtractPlugin.loader : "style-loader",
+          "css-loader",
+          "sass-loader",
+        ],
       },
       {
         test: /\.(png|jp(e*)g|svg|gif)$/,
@@ -66,15 +77,19 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: path.join(__dirname, "public", "index.html"),
-      minify: process.env.NODE_ENV === 'production' ? {
-				collapseWhitespace: true,
-				removeComments: true,
-			} : false
+      minify:
+        process.env.NODE_ENV === "production"
+          ? {
+              collapseWhitespace: true,
+              removeComments: true,
+            }
+          : false,
     }),
     new CleanWebpackPlugin(),
     new webpack.HotModuleReplacementPlugin(),
+    new MiniCssExtractPlugin(),
   ],
   devServer: {
-    historyApiFallback: true
+    historyApiFallback: true,
   },
 };
