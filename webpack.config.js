@@ -77,7 +77,6 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: path.join(__dirname, "public", "index.html"),
-      filename: webpackMode === "production" ? "[name].[contenthash].html" : "[name].min.html",
       minify:
         process.env.NODE_ENV === "production"
           ? {
