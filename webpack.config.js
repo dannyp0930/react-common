@@ -5,15 +5,20 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
+const Dotenv = require("dotenv-webpack");
 
 const webpackMode = process.env.NODE_ENV;
+console.log(webpackMode);
 
 module.exports = {
   entry: path.join(__dirname, "src", "index.js"),
   mode: webpackMode,
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: webpackMode === "production" ? "[name].[contenthash].js" : "[name].min.js",
+    filename:
+      webpackMode === "production"
+        ? "[name].[contenthash].js"
+        : "[name].min.js",
   },
   optimization: {
     minimizer:
@@ -56,7 +61,9 @@ module.exports = {
       {
         test: /\.s[ac]ss$/i,
         use: [
-          webpackMode === "production" ? MiniCssExtractPlugin.loader : "style-loader",
+          webpackMode === "production"
+            ? MiniCssExtractPlugin.loader
+            : "style-loader",
           "css-loader",
           "sass-loader",
         ],
@@ -78,7 +85,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: path.join(__dirname, "public", "index.html"),
       minify:
-        process.env.NODE_ENV === "production"
+        webpackMode === "production"
           ? {
               collapseWhitespace: true,
               removeComments: true,
@@ -88,7 +95,13 @@ module.exports = {
     new CleanWebpackPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     new MiniCssExtractPlugin({
-      filename: webpackMode === "production" ? "[name].[contenthash].css" : "[name].min.css",
+      filename:
+        webpackMode === "production"
+          ? "[name].[contenthash].css"
+          : "[name].min.css",
+    }),
+    new Dotenv({
+      path: `.env.${webpackMode === "production" ? "prod" : "dev"}`,
     }),
   ],
   devServer: {
