@@ -13,7 +13,7 @@ module.exports = {
   mode: webpackMode,
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "[name].min.js",
+    filename: webpackMode === "production" ? "[name].[contenthash].js" : "[name].min.js",
   },
   optimization: {
     minimizer:
@@ -77,6 +77,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: path.join(__dirname, "public", "index.html"),
+      filename: webpackMode === "production" ? "[name].[contenthash].html" : "[name].min.html",
       minify:
         process.env.NODE_ENV === "production"
           ? {
@@ -87,7 +88,9 @@ module.exports = {
     }),
     new CleanWebpackPlugin(),
     new webpack.HotModuleReplacementPlugin(),
-    new MiniCssExtractPlugin(),
+    new MiniCssExtractPlugin({
+      filename: webpackMode === "production" ? "[name].[contenthash].css" : "[name].min.css",
+    }),
   ],
   devServer: {
     historyApiFallback: true,
