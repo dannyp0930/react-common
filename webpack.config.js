@@ -1,7 +1,9 @@
 const path = require("path");
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const webpackMode = process.env.NODE_ENV || "development";
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+const webpackMode = process.env.NODE_ENV;
 
 module.exports = {
   entry: path.join(__dirname, "src", "index.js"),
@@ -40,6 +42,11 @@ module.exports = {
         },
       },
       {
+				test: /\.?(js|jsx)$/,
+				enforce: 'pre',
+				use: ['source-map-loader'],
+			},
+      {
         test: /\.s[ac]ss$/i,
         use: ["style-loader", "css-loader", "sass-loader"],
       },
@@ -59,12 +66,15 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: path.join(__dirname, "public", "index.html"),
+      minify: process.env.NODE_ENV === 'production' ? {
+				collapseWhitespace: true,
+				removeComments: true,
+			} : false
     }),
+    new CleanWebpackPlugin(),
     new webpack.HotModuleReplacementPlugin(),
   ],
   devServer: {
-    host: "localhost",
-    port: 3000,
-    historyApiFallback: true,
+    historyApiFallback: true
   },
 };
